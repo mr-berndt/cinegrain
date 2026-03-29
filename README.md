@@ -204,15 +204,17 @@ GRAIN_SIZE 0.5     COARSE_MIX  0.20   BLUR  0.0   CHROMA  0.30
 
 Same frame, four different settings. All at the same INTENSITY — the differences show what **GRAIN_SIZE** and **COARSE_MIX** actually do.
 
-| No grain | Fine / mosquito |
-|:---:|:---:|
-| ![no grain](comparison_no-grain.jpg) | ![mosquito noise](comparison_mosquito.jpg) |
-| OFF | `SIZE 0.50  COARSE 0.55  INT 0.125` |
+**No grain**
+![no grain](comparison_no-grain.jpg)
 
-| Medium / cinematic | Large / coarse |
-|:---:|:---:|
-| ![medium grain](comparison_medium.jpg) | ![coarse grain](comparison_coarse.jpg) |
-| `SIZE 2.00  COARSE 0.20  INT 0.055` | `SIZE 2.00  COARSE 0.45  INT 0.060` |
+**Fine / mosquito** — `SIZE 0.50  COARSE 0.55  INT 0.125`
+![mosquito noise](comparison_mosquito.jpg)
+
+**Medium / cinematic** — `SIZE 2.00  COARSE 0.20  INT 0.055`
+![medium grain](comparison_medium.jpg)
+
+**Large / coarse** — `SIZE 2.00  COARSE 0.45  INT 0.060`
+![coarse grain](comparison_coarse.jpg)
 
 **Fine + high COARSE_MIX** (top right): sub-pixel grain clusters into irregular blobs — looks like video noise or mosquito artifacts, not film.
 
