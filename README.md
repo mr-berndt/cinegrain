@@ -204,6 +204,8 @@ GRAIN_SIZE 0.5     COARSE_MIX  0.20   BLUR  0.0   CHROMA  0.30
 
 Same frame, four different settings. Shows what **GRAIN_SIZE** and **COARSE_MIX** actually do.
 
+*Best viewed when opened in a new tab.*
+
 **No grain**
 ![no grain](comparison_no-grain.jpg)
 
