@@ -4,7 +4,7 @@ A film grain shader for [mpv](https://mpv.io) with real-time parameter control.
 
 Being frustrated with titles like the 4k release of Aliens, which are de-noised to death and look terrible, I looked for a way to make them watchable again by adding the missing grain back to them. 
 
-The most widely used mpv grain shader is perhaps haasn's [filmgrain-smooth](https://github.com/haasn/gentoo-conf/blob/xor/home/nand/.mpv/shaders/filmgrain-smooth.glsl). It generates good random noise, but has some drawbacks compared to real film grain:
+The most widely used mpv grain shader is perhaps haasn's [filmgrain-smooth](https://github.com/haasn/gentoo-conf/blob/xor/home/nand/.mpv/shaders/filmgrain-smooth.glsl) (LGPL v2.1+). It generates good random noise, but has some drawbacks compared to real film grain:
 
 **1. Gray lift in shadows**
 Adding any positive-leaning grain to near-black pixels raises them above zero. Blacks become gray. Crushing shadow detail.
@@ -213,3 +213,11 @@ GRAIN_SIZE 0.5     COARSE_MIX  0.20   BLUR  0.0   CHROMA  0.30
 **CHROMA** adds subtle color variation. Keep it below INTENSITY. Values above 0.5 start looking like digital camera noise.
 
 **BLUR** is usually set once per screen size. Larger displays or projectors benefit from more blur (0.4–0.6) to avoid seeing the noise grid at large grain sizes.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+The PRNG (permutation hash) used in this shader is derived from Niklas Haas's work in [libplacebo](https://github.com/haasn/libplacebo) (LGPL v2.1+). The original permutation hash and Gaussian approximation are his; the luminance weighting, multi-scale noise, spatial blur, and colour grain are original additions.
