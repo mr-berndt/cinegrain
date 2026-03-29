@@ -143,19 +143,19 @@ The toggle (`ALT+q`) makes this immediately visible. Switch grain on — the ima
 
 ## Before / After
 
-Source: *A Crime* (2006), 720p — DVD source.
+Source: 720p DVD — low-bitrate encode with visible compression noise.
 
 **Without grain**
-![before](<A Crime (2006)-00:13:14.280_no-grain.jpg>)
+![before](dvd-sample_no-grain.jpg)
 
 **With grain**
-![after](<A Crime (2006)-00:13:14.280_grain.jpg>)
+![after](dvd-sample_grain.jpg)
 
 Detail:
 
 | Without grain | With grain |
 |:---:|:---:|
-| ![before crop](A_Crime_crop_no-grain.jpg) | ![after crop](A_Crime_crop_grain.jpg) |
+| ![before crop](dvd-sample_crop_no-grain.jpg) | ![after crop](dvd-sample_crop_grain.jpg) |
 
 It is a a little hard to see at this size, but compression artifacts are masked and the image reads as sharper and more filmic despite being the same low-resolution source.
 
