@@ -200,6 +200,30 @@ GRAIN_SIZE 0.5     COARSE_MIX  0.20   BLUR  0.0   CHROMA  0.30
 
 ---
 
+## Visual Comparison
+
+Same frame, four different settings. All at the same INTENSITY — the differences show what **GRAIN_SIZE** and **COARSE_MIX** actually do.
+
+| No grain | Fine / mosquito |
+|:---:|:---:|
+| ![no grain](comparison_no-grain.jpg) | ![mosquito noise](comparison_mosquito.jpg) |
+| OFF | `SIZE 0.50  COARSE 0.55  INT 0.125` |
+
+| Medium / cinematic | Large / coarse |
+|:---:|:---:|
+| ![medium grain](comparison_medium.jpg) | ![coarse grain](comparison_coarse.jpg) |
+| `SIZE 2.00  COARSE 0.20  INT 0.055` | `SIZE 2.00  COARSE 0.45  INT 0.060` |
+
+**Fine + high COARSE_MIX** (top right): sub-pixel grain clusters into irregular blobs — looks like video noise or mosquito artifacts, not film.
+
+**Medium SIZE + low COARSE_MIX** (bottom left): smooth, fine texture. Looks like a clean fine-grain stock. Good baseline for most sources.
+
+**Medium SIZE + high COARSE_MIX** (bottom right): the same grid but with coarser clumping structure layered on top. This is what pushed or older 35mm film looks like — irregular clusters with visible scale variation.
+
+The key takeaway: **GRAIN_SIZE sets the base scale, COARSE_MIX sets how organic it looks**. Fine grain with high COARSE_MIX reads as noise. Coarser grain with moderate COARSE_MIX reads as film.
+
+---
+
 ## Tuning Guide
 
 **Start with INTENSITY.** Toggle the shader on/off (`ALT+z`) to compare. Aim for the difference to be felt rather than seen.
