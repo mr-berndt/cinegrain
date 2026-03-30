@@ -120,7 +120,7 @@ All presets are defined at the top of `grain-control.lua` and can be edited free
 The 4K transfer of Aliens is de-noised to death. The **35mm high** preset matches the grain texture of the 1080p version missing in the 4K transfer.
 
 ```
-INTENSITY  0.060
+INTENSITY  0.050
 PEAK       0.40
 ROLLOFF    0.30
 GRAIN_SIZE 1.25
@@ -141,7 +141,7 @@ GRAIN_SIZE 1.25    COARSE_MIX  0.60   BLUR  0.10   CHROMA  0.20
 Softer, more pronounced grain with higher blur — good for de-noised transfers where grain needs to read as film texture rather than noise. Works well for Aliens 4K and similar over-processed masters.
 
 ```
-INTENSITY  0.060   PEAK  0.40   ROLLOFF  0.30
+INTENSITY  0.050   PEAK  0.40   ROLLOFF  0.30
 GRAIN_SIZE 1.25    COARSE_MIX  0.70   BLUR  0.80   CHROMA  0.20
 ```
 
