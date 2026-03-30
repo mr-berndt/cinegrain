@@ -18,13 +18,9 @@ local SHADER_PATH = "~/.config/mpv/shaders/cinegrain.glsl"
 -- ─── Presets ──────────────────────────────────────────────────────────────────
 -- Add or edit presets here. Order = cycle order.
 local presets = {
-    { name = "Aliens 4K",      INTENSITY=0.040, PEAK=0.40, ROLLOFF=0.20, GRAIN_SIZE=2.0,  COARSE_MIX=0.30, BLUR=0.40, CHROMA=0.30 },
-    { name = "35mm Normal",    INTENSITY=0.09,  PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.75, COARSE_MIX=0.40, BLUR=0.70, CHROMA=0.20 },
-    { name = "35mm High",      INTENSITY=0.075, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.25, COARSE_MIX=0.60, BLUR=0.10, CHROMA=0.20 },
-    { name = "35mm G3",        INTENSITY=0.125, PEAK=0.35, ROLLOFF=0.40, GRAIN_SIZE=1.0,  COARSE_MIX=0.00, BLUR=0.00, CHROMA=0.30 },
-    { name = "35mm Pushed",    INTENSITY=0.190, PEAK=0.35, ROLLOFF=0.47, GRAIN_SIZE=0.75, COARSE_MIX=0.40, BLUR=0.00, CHROMA=0.20 },
-    { name = "Kodak Gold 200", INTENSITY=0.500, PEAK=0.29, ROLLOFF=0.45, GRAIN_SIZE=0.5,  COARSE_MIX=0.20, BLUR=0.00, CHROMA=0.30 },
-    { name = "Off",            INTENSITY=0.00,  PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.75, COARSE_MIX=0.40, BLUR=0.70, CHROMA=0.00 },
+    { name = "Aliens 4K",   INTENSITY=0.040, PEAK=0.40, ROLLOFF=0.20, GRAIN_SIZE=2.0,  COARSE_MIX=0.30, BLUR=0.40, CHROMA=0.30 },
+    { name = "35mm Normal", INTENSITY=0.09,  PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.75, COARSE_MIX=0.40, BLUR=0.70, CHROMA=0.20 },
+    { name = "35mm High",   INTENSITY=0.075, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.25, COARSE_MIX=0.60, BLUR=0.10, CHROMA=0.20 },
 }
 -- ──────────────────────────────────────────────────────────────────────────────
 
@@ -45,6 +41,11 @@ local steps = {
     BLUR       = 0.05,
     CHROMA     = 0.05,
 }
+
+-- amos-specific persistence files
+local VALUE_FILE         = "/home/nicola/.config/mpv/mpv-grain-value"
+local SHARPEN_VALUE_FILE = "/home/nicola/.config/mpv/mpv-sharpen-value"
+local PRESET_FILE        = "/home/nicola/.config/mpv/mpv-grain-preset"
 
 local function push_opts()
     -- Read-merge-write: preserve other shaders' params in the shared flat map
@@ -95,6 +96,9 @@ local function apply_preset(idx, silent)
     for k, v in pairs(p) do
         if k ~= "name" then params[k] = v end
     end
+    -- Persist preset index
+    local pf = io.open(PRESET_FILE, "w")
+    if pf then pf:write(tostring(idx)); pf:close() end
     push_opts()
     if not silent then osd_update() end
 end
@@ -131,13 +135,51 @@ local function toggle()
     osd_update()
 end
 
--- Re-apply params on file load (mpv resets glsl-shader-opts between files)
 mp.register_event("file-loaded", function()
-    push_opts()
+    local f = io.open(VALUE_FILE, "r")
+    if f then
+        local val = tonumber(f:read("*l"))
+        f:close()
+        if val and val >= 0.0 and val <= 2.0 then
+            params.INTENSITY = val
+            current_preset_name = nil
+        end
+    end
+
+    local sf = io.open(SHARPEN_VALUE_FILE, "r")
+    local sharpen_val = nil
+    if sf then
+        sharpen_val = tonumber(sf:read("*l"))
+        sf:close()
+    end
+
+    -- Write all grain params + sharpen in one merged write
+    local cur = mp.get_property_native("glsl-shader-opts", {})
+    cur[SHADER_NAME .. "/INTENSITY"]  = string.format("%.4f", params.INTENSITY)
+    cur[SHADER_NAME .. "/PEAK"]       = string.format("%.4f", params.PEAK)
+    cur[SHADER_NAME .. "/ROLLOFF"]    = string.format("%.4f", params.ROLLOFF)
+    cur[SHADER_NAME .. "/GRAIN_SIZE"] = string.format("%.4f", params.GRAIN_SIZE)
+    cur[SHADER_NAME .. "/COARSE_MIX"] = string.format("%.4f", params.COARSE_MIX)
+    cur[SHADER_NAME .. "/BLUR"]       = string.format("%.4f", params.BLUR)
+    cur[SHADER_NAME .. "/CHROMA"]     = string.format("%.4f", params.CHROMA)
+    if sharpen_val and sharpen_val >= 0.0 and sharpen_val <= 3.0 then
+        cur["adaptive-sharpen-live/curve_height"] = string.format("%.2f", sharpen_val)
+    end
+    local parts = {}
+    for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
+    mp.set_property("glsl-shader-opts", table.concat(parts, ","))
+
 end)
 
--- Apply first preset on startup (silent — no OSD flash)
-apply_preset(1, true)
+-- Restore last preset on startup (silent — no OSD flash)
+local startup_preset = 1
+local spf = io.open(PRESET_FILE, "r")
+if spf then
+    local v = tonumber(spf:read("*l"))
+    spf:close()
+    if v and v >= 1 and v <= #presets then startup_preset = v end
+end
+apply_preset(startup_preset, true)
 
 local rep = {repeatable = true}
 
