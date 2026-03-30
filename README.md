@@ -94,7 +94,7 @@ The companion `grain-control.lua` script provides live keyboard control (QWERTZ 
 | `ALT+o` / `ALT+l` | BLUR +/- |
 | `ALT+p` / `ALT+ö` | CHROMA +/- |
 
-The OSD displays all current parameter values persistently. When a preset is active, its name is shown in brackets (e.g. `[Aliens 4K]`). Manually adjusting any parameter after loading a preset switches the display to `[custom]`.
+The OSD displays all current parameter values persistently. When a preset is active, its name is shown in brackets (e.g. `[35mm high]`). Manually adjusting any parameter after loading a preset switches the display to `[custom]`.
 
 ---
 
@@ -117,16 +117,16 @@ The Lua script loads automatically from the scripts directory.
 All presets are defined at the top of `grain-control.lua` and can be edited freely. Cycle through them with `ALT+,` / `ALT+.`.
 
 ### Aliens (1986) 4K Blu-ray
-Matches the grain texture of the 1080p version missing in the 4K transfer. This is the first preset and the default on startup.
+The 4K transfer of Aliens is de-noised to death. The **35mm high** preset matches the grain texture of the 1080p version missing in the 4K transfer.
 
 ```
-INTENSITY  0.040
+INTENSITY  0.060
 PEAK       0.40
-ROLLOFF    0.20
-GRAIN_SIZE 2.0
-COARSE_MIX 0.30
-BLUR       0.40
-CHROMA     0.30
+ROLLOFF    0.30
+GRAIN_SIZE 1.25
+COARSE_MIX 0.70
+BLUR       0.80
+CHROMA     0.20
 ```
 
 ### 35mm Normal
@@ -137,12 +137,12 @@ INTENSITY  0.075   PEAK  0.40   ROLLOFF  0.40
 GRAIN_SIZE 1.25    COARSE_MIX  0.60   BLUR  0.10   CHROMA  0.20
 ```
 
-### 35mm High
-Higher intensity scan character with more blur — softer and more pronounced.
+### 35mm high
+Softer, more pronounced grain with higher blur — good for de-noised transfers where grain needs to read as film texture rather than noise. Works well for Aliens 4K and similar over-processed masters.
 
 ```
-INTENSITY  0.090   PEAK  0.40   ROLLOFF  0.40
-GRAIN_SIZE 0.75    COARSE_MIX  0.40   BLUR  0.70   CHROMA  0.20
+INTENSITY  0.060   PEAK  0.40   ROLLOFF  0.30
+GRAIN_SIZE 1.25    COARSE_MIX  0.70   BLUR  0.80   CHROMA  0.20
 ```
 
 ---
