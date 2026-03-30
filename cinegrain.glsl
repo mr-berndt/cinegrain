@@ -6,7 +6,7 @@
 //!TYPE float
 //!MINIMUM 0.0
 //!MAXIMUM 2.0
-0.040
+0.09
 
 //!PARAM PEAK
 //!DESC Luminance where grain is strongest (0.0-1.0)
@@ -20,35 +20,35 @@
 //!TYPE float
 //!MINIMUM 0.01
 //!MAXIMUM 2.0
-0.20
+0.40
 
 //!PARAM GRAIN_SIZE
 //!DESC Primary grain size in pixels (1.0 = 1px, 3.0 = 3px)
 //!TYPE float
 //!MINIMUM 0.5
 //!MAXIMUM 6.0
-2.0
+0.75
 
 //!PARAM COARSE_MIX
 //!DESC Amount of coarse grain layer (coarse = GRAIN_SIZE x2.5)
 //!TYPE float
 //!MINIMUM 0.0
 //!MAXIMUM 1.0
-0.3
+0.4
 
 //!PARAM BLUR
 //!DESC Grain softness (0 = crisp, 1 = soft)
 //!TYPE float
 //!MINIMUM 0.0
 //!MAXIMUM 1.0
-0.6
+0.7
 
 //!PARAM CHROMA
 //!DESC Colour grain strength (R/B shift, film-style)
 //!TYPE float
 //!MINIMUM 0.0
 //!MAXIMUM 1.0
-0.3
+0.2
 
 //!HOOK OUTPUT
 //!BIND HOOKED
@@ -98,7 +98,7 @@ float blurred_noise(vec2 pixel_pos, float size, float seed)
     return (n0 + n1 + n2 + n3 + n4) / 6.0;
 }
 
-// Bell curve: peaks at PEAK, fades toward shadows and highlights
+// Bell curve: peaks at PEAK, fades toward highlights
 float luma_weight(float luma)
 {
     float d = (luma - PEAK) / ROLLOFF;
@@ -129,6 +129,9 @@ vec4 hook()
         color.r += cw * cr;
         color.b += cw * cb;
     }
+
+    // Clamp to prevent negative values (dark channel clipping → black spots)
+    color.rgb = max(color.rgb, vec3(0.0));
 
     return color;
 }

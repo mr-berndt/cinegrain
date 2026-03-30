@@ -85,6 +85,7 @@ The companion `grain-control.lua` script provides live keyboard control (QWERTZ 
 | Keys | Parameter |
 |------|-----------|
 | `ALT+q` | Toggle grain on/off |
+| `ALT+,` / `ALT+.` | Cycle presets (prev/next) |
 | `ALT+r` / `ALT+f` | INTENSITY +/- |
 | `ALT+t` / `ALT+g` | PEAK +/- |
 | `ALT+z` / `ALT+h` | ROLLOFF +/- |
@@ -92,6 +93,8 @@ The companion `grain-control.lua` script provides live keyboard control (QWERTZ 
 | `ALT+i` / `ALT+k` | COARSE_MIX +/- |
 | `ALT+o` / `ALT+l` | BLUR +/- |
 | `ALT+p` / `ALT+ö` | CHROMA +/- |
+
+The OSD displays all current parameter values persistently. When a preset is active, its name is shown in brackets (e.g. `[Aliens 4K]`). Manually adjusting any parameter after loading a preset switches the display to `[custom]`.
 
 ---
 
@@ -111,8 +114,10 @@ The Lua script loads automatically from the scripts directory.
 
 ## Presets
 
+All presets are defined at the top of `grain-control.lua` and can be edited freely. Cycle through them with `ALT+,` / `ALT+.`.
+
 ### Aliens (1986) 4K Blu-ray
-Matches the grain texture of the 1080p version missing in the 4K transfer:
+Matches the grain texture of the 1080p version missing in the 4K transfer. This is the first preset and the default on startup.
 
 ```
 INTENSITY  0.040
@@ -123,7 +128,22 @@ COARSE_MIX 0.30
 BLUR       0.40
 CHROMA     0.30
 ```
-These are the current defaults.
+
+### 35mm Normal
+Scanned 35mm grain — moderate intensity, high COARSE_MIX for organic clustering, low BLUR for crispness.
+
+```
+INTENSITY  0.075   PEAK  0.40   ROLLOFF  0.40
+GRAIN_SIZE 1.25    COARSE_MIX  0.60   BLUR  0.10   CHROMA  0.20
+```
+
+### 35mm High
+Higher intensity scan character with more blur — softer and more pronounced.
+
+```
+INTENSITY  0.090   PEAK  0.40   ROLLOFF  0.40
+GRAIN_SIZE 0.75    COARSE_MIX  0.40   BLUR  0.70   CHROMA  0.20
+```
 
 ---
 
