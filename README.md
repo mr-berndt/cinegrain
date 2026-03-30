@@ -181,15 +181,15 @@ It is a a little hard to see at this size, but compression artifacts are masked 
 
 ---
 
-## Presets
+## Examples
 
-The following presets were developed by comparing against real 35mm grain scans. Appears a little blurry due to high magnification — actual grain is finer ab sharper at normal viewing distance. Playing with the parameters can simulate quiet a variety of actual film grain.
+The following examples were developed by comparing against real 35mm grain scans. Appears a little blurry due to high magnification — actual grain is finer and sharper at normal viewing distance. Playing with the parameters can simulate a variety of actual film grain.
 
 | Reference scan 1 | Reference scan 2 |
 |:---:|:---:|
 | <img src="35mm_grain_scan_1_crop.jpg" width="400"> | <img src="35mm_grain_scan_2_crop.jpg" width="400"> |
 
-Tuned to match the character of specific film stocks. Use as starting points.
+These are not built-in presets — use them as starting points for your own tuning.
 
 ### 35mm G3
 Fine-grain stock. Subtle texture, almost invisible — good for modern films or sources you want to enhance without it being obvious.
@@ -200,7 +200,7 @@ GRAIN_SIZE 1.0     COARSE_MIX  0.0   BLUR  0.0   CHROMA  0.30
 ```
 <img src="cinegrain_preset_35mm_g3_int0.125_peak0.35_roll0.4_size1_coarse0_blur0_chroma0.3_crop.jpg" width="400">
 
-### 35mm (pushed)
+### 35mm pushed
 Coarser, more character. Older stock feel.
 
 ```
