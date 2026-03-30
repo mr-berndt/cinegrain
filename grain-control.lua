@@ -64,6 +64,8 @@ end
 local grain_enabled = true
 
 local overlay = mp.create_osd_overlay("ass-events")
+local osd_timer = nil
+local OSD_TIMEOUT = 4
 
 local function osd_update()
     local preset_tag = current_preset_name
@@ -79,9 +81,14 @@ local function osd_update()
             params.COARSE_MIX, params.BLUR, params.CHROMA)
     end
     overlay:update()
+    if osd_timer then osd_timer:kill() end
+    osd_timer = mp.add_timeout(OSD_TIMEOUT, function()
+        overlay.data = ""
+        overlay:update()
+    end)
 end
 
-local function apply_preset(idx)
+local function apply_preset(idx, silent)
     preset_index = idx
     local p = presets[idx]
     current_preset_name = p.name
@@ -89,7 +96,7 @@ local function apply_preset(idx)
         if k ~= "name" then params[k] = v end
     end
     push_opts()
-    osd_update()
+    if not silent then osd_update() end
 end
 
 local function cycle_preset(dir)
@@ -124,49 +131,13 @@ local function toggle()
     osd_update()
 end
 
--- Restore grain intensity and sharpness on file load
-local VALUE_FILE         = "/home/nicola/.config/mpv/mpv-grain-value"
-local SHARPEN_VALUE_FILE = "/home/nicola/.config/mpv/mpv-sharpen-value"
-
+-- Re-apply params on file load (mpv resets glsl-shader-opts between files)
 mp.register_event("file-loaded", function()
-    local f = io.open(VALUE_FILE, "r")
-    if f then
-        local val = tonumber(f:read("*l"))
-        f:close()
-        if val and val >= 0.0 and val <= 2.0 then
-            params.INTENSITY = val
-            current_preset_name = nil
-        end
-    end
-
-    local sf = io.open(SHARPEN_VALUE_FILE, "r")
-    local sharpen_val = nil
-    if sf then
-        sharpen_val = tonumber(sf:read("*l"))
-        sf:close()
-    end
-
-    -- Write all grain params + sharpen in one merged write
-    local cur = mp.get_property_native("glsl-shader-opts", {})
-    cur[SHADER_NAME .. "/INTENSITY"]  = string.format("%.4f", params.INTENSITY)
-    cur[SHADER_NAME .. "/PEAK"]       = string.format("%.4f", params.PEAK)
-    cur[SHADER_NAME .. "/ROLLOFF"]    = string.format("%.4f", params.ROLLOFF)
-    cur[SHADER_NAME .. "/GRAIN_SIZE"] = string.format("%.4f", params.GRAIN_SIZE)
-    cur[SHADER_NAME .. "/COARSE_MIX"] = string.format("%.4f", params.COARSE_MIX)
-    cur[SHADER_NAME .. "/BLUR"]       = string.format("%.4f", params.BLUR)
-    cur[SHADER_NAME .. "/CHROMA"]     = string.format("%.4f", params.CHROMA)
-    if sharpen_val and sharpen_val >= 0.0 and sharpen_val <= 3.0 then
-        cur["adaptive-sharpen-live/curve_height"] = string.format("%.2f", sharpen_val)
-    end
-    local parts = {}
-    for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
-    mp.set_property("glsl-shader-opts", table.concat(parts, ","))
-
-    osd_update()
+    push_opts()
 end)
 
--- Apply first preset on startup
-apply_preset(1)
+-- Apply first preset on startup (silent — no OSD flash)
+apply_preset(1, true)
 
 local rep = {repeatable = true}
 
