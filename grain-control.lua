@@ -19,8 +19,8 @@ local SHADER_PATH = "~/.config/mpv/shaders/cinegrain.glsl"
 -- Add or edit presets here. Order = cycle order.
 local presets = {
     { name = "4k superfine", INTENSITY=0.070, PEAK=0.40, ROLLOFF=0.33, GRAIN_SIZE=0.50, COARSE_MIX=0.45, BLUR=1.00, CHROMA=0.20 },
-    { name = "35mm Normal", INTENSITY=0.075, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.75, COARSE_MIX=0.40, BLUR=0.70, CHROMA=0.20 },
-    { name = "35mm High",   INTENSITY=0.065, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.25, COARSE_MIX=0.60, BLUR=0.10, CHROMA=0.20 },
+    { name = "35mm normal", INTENSITY=0.075, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.75, COARSE_MIX=0.40, BLUR=0.70, CHROMA=0.20 },
+    { name = "35mm high",   INTENSITY=0.065, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.25, COARSE_MIX=0.60, BLUR=0.10, CHROMA=0.20 },
 }
 -- ──────────────────────────────────────────────────────────────────────────────
 
