@@ -18,12 +18,15 @@ local SHADER_PATH = "~/.config/mpv/shaders/cinegrain.glsl"
 -- ─── Presets ──────────────────────────────────────────────────────────────────
 -- Add or edit presets here. Order = cycle order.
 local presets = {
-    { name = "35mm",       INTENSITY=0.060, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.10, BLUR=0.90, CHROMA=0.10 },
-    { name = "35mm heavy", INTENSITY=0.115, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.00, COARSE_MIX=0.15, BLUR=0.35, CHROMA=0.20 },
-    { name = "16mm",       INTENSITY=0.145, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.00, COARSE_MIX=0.22, BLUR=0.55, CHROMA=0.20 },
-    { name = "16mm heavy", INTENSITY=0.165, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=3.00, COARSE_MIX=0.30, BLUR=0.65, CHROMA=0.10 },
-    { name = "8mm",        INTENSITY=0.165, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=3.50, COARSE_MIX=0.30, BLUR=1.00, CHROMA=0.15 },
-    { name = "8mm heavy",  INTENSITY=0.280, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=4.50, COARSE_MIX=0.35, BLUR=1.00, CHROMA=0.08 },
+    -- Universal character: BLUR=0.55, COARSE_MIX=0.70, CHROMA=0.05
+    -- SOFTNESS is relative (r = SOFTNESS * GRAIN_SIZE in shader)
+    -- Only SIZE, INTENSITY, and SOFTNESS vary per format
+    { name = "35mm",      INTENSITY=0.085, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.65, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=0.46 },
+    { name = "35mm fast", INTENSITY=0.160, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.70, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.13 },
+    { name = "16mm",      INTENSITY=0.130, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.00, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=0.87 },
+    { name = "16mm fast", INTENSITY=0.145, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.41, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.06 },
+    { name = "8mm",       INTENSITY=0.160, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.50, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.13 },
+    { name = "8mm fast",  INTENSITY=0.240, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.50, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.16 },
 }
 -- ──────────────────────────────────────────────────────────────────────────────
 
@@ -39,10 +42,11 @@ local steps = {
     INTENSITY  = 0.005,
     PEAK       = 0.01,
     ROLLOFF    = 0.01,
-    GRAIN_SIZE = 0.25,
+    GRAIN_SIZE = 0.05,
     COARSE_MIX = 0.05,
     BLUR       = 0.05,
     CHROMA     = 0.05,
+    SOFTNESS   = 0.05,
 }
 
 -- amos-specific persistence files
@@ -60,6 +64,7 @@ local function push_opts()
     cur[SHADER_NAME .. "/COARSE_MIX"] = string.format("%.4f", params.COARSE_MIX)
     cur[SHADER_NAME .. "/BLUR"]       = string.format("%.4f", params.BLUR)
     cur[SHADER_NAME .. "/CHROMA"]     = string.format("%.4f", params.CHROMA)
+    cur[SHADER_NAME .. "/SOFTNESS"]   = string.format("%.4f", params.SOFTNESS or 0.0)
     local parts = {}
     for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
     mp.set_property("glsl-shader-opts", table.concat(parts, ","))
@@ -79,10 +84,10 @@ local function osd_update()
         overlay.data = "{\\an7\\fs16\\c&H00FFFF&}Grain: OFF"
     else
         overlay.data = string.format(
-            "{\\an7\\fs16\\c&H00FFFF&}Grain%s  INT %.3f  PEAK %.2f  ROLL %.2f  SIZE %.2f  COARSE %.2f  BLUR %.2f  CHROMA %.2f",
+            "{\\an7\\fs16\\c&H00FFFF&}Grain%s  INT %.3f  PEAK %.2f  ROLL %.2f  SIZE %.2f  COARSE %.2f  BLUR %.2f  CHROMA %.2f  SOFT %.2f",
             preset_tag,
             params.INTENSITY, params.PEAK, params.ROLLOFF, params.GRAIN_SIZE,
-            params.COARSE_MIX, params.BLUR, params.CHROMA)
+            params.COARSE_MIX, params.BLUR, params.CHROMA, params.SOFTNESS or 0.0)
     end
     overlay:update()
     if osd_timer then osd_timer:kill() end
@@ -165,6 +170,7 @@ mp.register_event("file-loaded", function()
     cur[SHADER_NAME .. "/COARSE_MIX"] = string.format("%.4f", params.COARSE_MIX)
     cur[SHADER_NAME .. "/BLUR"]       = string.format("%.4f", params.BLUR)
     cur[SHADER_NAME .. "/CHROMA"]     = string.format("%.4f", params.CHROMA)
+    cur[SHADER_NAME .. "/SOFTNESS"]   = string.format("%.4f", params.SOFTNESS or 0.0)
     if sharpen_val and sharpen_val >= 0.0 and sharpen_val <= 3.0 then
         cur["adaptive-sharpen-live/curve_height"] = string.format("%.2f", sharpen_val)
     end
