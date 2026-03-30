@@ -12,6 +12,7 @@
 
 local mp = require 'mp'
 
+local SHADER_NAME = "cinegrain"
 local SHADER_PATH = "~/.config/mpv/shaders/cinegrain.glsl"
 
 -- ─── Presets ──────────────────────────────────────────────────────────────────
@@ -46,10 +47,18 @@ local steps = {
 }
 
 local function push_opts()
-    mp.set_property("glsl-shader-opts", string.format(
-        "INTENSITY=%.4f,PEAK=%.4f,ROLLOFF=%.4f,GRAIN_SIZE=%.4f,COARSE_MIX=%.4f,BLUR=%.4f,CHROMA=%.4f",
-        params.INTENSITY, params.PEAK, params.ROLLOFF, params.GRAIN_SIZE,
-        params.COARSE_MIX, params.BLUR, params.CHROMA))
+    -- Read-merge-write: preserve other shaders' params in the shared flat map
+    local cur = mp.get_property_native("glsl-shader-opts", {})
+    cur[SHADER_NAME .. "/INTENSITY"]  = string.format("%.4f", params.INTENSITY)
+    cur[SHADER_NAME .. "/PEAK"]       = string.format("%.4f", params.PEAK)
+    cur[SHADER_NAME .. "/ROLLOFF"]    = string.format("%.4f", params.ROLLOFF)
+    cur[SHADER_NAME .. "/GRAIN_SIZE"] = string.format("%.4f", params.GRAIN_SIZE)
+    cur[SHADER_NAME .. "/COARSE_MIX"] = string.format("%.4f", params.COARSE_MIX)
+    cur[SHADER_NAME .. "/BLUR"]       = string.format("%.4f", params.BLUR)
+    cur[SHADER_NAME .. "/CHROMA"]     = string.format("%.4f", params.CHROMA)
+    local parts = {}
+    for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
+    mp.set_property("glsl-shader-opts", table.concat(parts, ","))
 end
 
 local grain_enabled = true
@@ -115,8 +124,9 @@ local function toggle()
     osd_update()
 end
 
--- Restore saved intensity on file load
-local VALUE_FILE = "/home/nicola/.config/mpv/mpv-grain-value"
+-- Restore grain intensity and sharpness on file load
+local VALUE_FILE         = "/home/nicola/.config/mpv/mpv-grain-value"
+local SHARPEN_VALUE_FILE = "/home/nicola/.config/mpv/mpv-sharpen-value"
 
 mp.register_event("file-loaded", function()
     local f = io.open(VALUE_FILE, "r")
@@ -126,9 +136,32 @@ mp.register_event("file-loaded", function()
         if val and val >= 0.0 and val <= 2.0 then
             params.INTENSITY = val
             current_preset_name = nil
-            push_opts()
         end
     end
+
+    local sf = io.open(SHARPEN_VALUE_FILE, "r")
+    local sharpen_val = nil
+    if sf then
+        sharpen_val = tonumber(sf:read("*l"))
+        sf:close()
+    end
+
+    -- Write all grain params + sharpen in one merged write
+    local cur = mp.get_property_native("glsl-shader-opts", {})
+    cur[SHADER_NAME .. "/INTENSITY"]  = string.format("%.4f", params.INTENSITY)
+    cur[SHADER_NAME .. "/PEAK"]       = string.format("%.4f", params.PEAK)
+    cur[SHADER_NAME .. "/ROLLOFF"]    = string.format("%.4f", params.ROLLOFF)
+    cur[SHADER_NAME .. "/GRAIN_SIZE"] = string.format("%.4f", params.GRAIN_SIZE)
+    cur[SHADER_NAME .. "/COARSE_MIX"] = string.format("%.4f", params.COARSE_MIX)
+    cur[SHADER_NAME .. "/BLUR"]       = string.format("%.4f", params.BLUR)
+    cur[SHADER_NAME .. "/CHROMA"]     = string.format("%.4f", params.CHROMA)
+    if sharpen_val and sharpen_val >= 0.0 and sharpen_val <= 3.0 then
+        cur["adaptive-sharpen-live/curve_height"] = string.format("%.2f", sharpen_val)
+    end
+    local parts = {}
+    for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
+    mp.set_property("glsl-shader-opts", table.concat(parts, ","))
+
     osd_update()
 end)
 
