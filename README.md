@@ -149,18 +149,19 @@ ROLLOFF    0.40    -- bell curve width
 
 ### Film format presets
 
-"Normal" simulates a slow, fine-grained stock (e.g. Kodak 5219 / Vision3 500T). "Fast" simulates a faster, coarser stock (e.g. pushed Tri-X or high-speed reversal).
+Preset names reference real Kodak Vision3 film stocks. The parenthetical label indicates the speed class for non-cinephiles.
 
 **A note on accuracy:** Side-by-side comparison with real film scans shows that the structural characteristics — grain shape, clustering, spatial correlation, and scale — are authentically film-like. The synthesized grain does not replicate a specific film stock, but it looks like *a* real film stock. Think of it as a plausible film that Kodak never manufactured, rather than a digital approximation.
 
 | Preset | GRAIN_SIZE | INTENSITY | SOFTNESS | Use case |
 |---|---|---|---|---|
-| **35mm** | 0.65 | 0.085 | 0.46 | Modern 35mm scans, subtle texture |
-| **35mm fast** | 0.70 | 0.160 | 1.13 | De-noised 4K transfers (e.g. Aliens), pushed 35mm |
-| **16mm** | 1.00 | 0.130 | 0.87 | 16mm documentary / indie look |
-| **16mm fast** | 1.41 | 0.145 | 1.06 | High-speed 16mm, visible grain structure |
-| **8mm** | 2.50 | 0.160 | 1.13 | Super 8 home movie texture |
-| **8mm fast** | 2.50 | 0.240 | 1.16 | Grainy Super 8, high-speed reversal |
+| **35mm 50D (low)** | 0.65 | 0.085 | 0.46 | Modern 35mm scans, subtle texture |
+| **35mm 250D (mid)** | 0.67 | 0.115 | 0.73 | De-noised 4K transfers (e.g. Aliens), medium-speed daylight stock |
+| **35mm 500T (high)** | 0.70 | 0.160 | 1.13 | Pushed 35mm, tungsten workhorse |
+| **16mm 50D (low)** | 1.00 | 0.130 | 0.87 | 16mm documentary / indie look |
+| **16mm 500T (high)** | 1.41 | 0.145 | 1.06 | High-speed 16mm, visible grain structure |
+| **S8 50D (low)** | 2.50 | 0.160 | 1.13 | Super 8 home movie texture |
+| **S8 500T (high)** | 2.50 | 0.240 | 1.16 | Grainy Super 8, high-speed stock |
 
 ---
 
