@@ -151,14 +151,15 @@ vec4 hook()
     if (SOFTNESS < 0.001) {
         grain = grain_sample(pixel_pos, seed);
     } else {
-        // 5-tap cross blur (cardinal directions only, corners dropped for performance)
-        // Weights renormalized from 9-tap: centre 0.20/0.84, cardinal 0.16/0.84
+        // 5-tap cross blur using fine_grain only (no coarse layer per tap)
+        // The spatial averaging over radius provides coarse structure — inner
+        // blurred_noise would be redundant and expensive. ~70% fewer hash ops.
         float r = SOFTNESS * GRAIN_SIZE;
-        grain  = grain_sample(pixel_pos,                   seed) * 0.238;
-        grain += grain_sample(pixel_pos + vec2( r,  0.0), seed) * 0.190;
-        grain += grain_sample(pixel_pos + vec2(-r,  0.0), seed) * 0.190;
-        grain += grain_sample(pixel_pos + vec2(0.0,  r),  seed) * 0.190;
-        grain += grain_sample(pixel_pos + vec2(0.0, -r),  seed) * 0.190;
+        grain  = fine_grain(pixel_pos,                   GRAIN_SIZE, seed) * 0.238;
+        grain += fine_grain(pixel_pos + vec2( r,  0.0), GRAIN_SIZE, seed) * 0.190;
+        grain += fine_grain(pixel_pos + vec2(-r,  0.0), GRAIN_SIZE, seed) * 0.190;
+        grain += fine_grain(pixel_pos + vec2(0.0,  r),  GRAIN_SIZE, seed) * 0.190;
+        grain += fine_grain(pixel_pos + vec2(0.0, -r),  GRAIN_SIZE, seed) * 0.190;
     }
 
     vec4 color = HOOKED_tex(HOOKED_pos);
