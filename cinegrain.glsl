@@ -50,6 +50,13 @@
 //!MAXIMUM 1.0
 0.2
 
+//!PARAM SOFTNESS
+//!DESC Spatial blur radius for grain (0=off, 1=soft, 3=very soft)
+//!TYPE float
+//!MINIMUM 0.0
+//!MAXIMUM 8.0
+0.0
+
 //!HOOK OUTPUT
 //!BIND HOOKED
 //!DESC cinegrain
@@ -128,14 +135,33 @@ float luma_weight(float luma)
     return exp(-0.5 * d * d);
 }
 
+float grain_sample(vec2 pos, float seed)
+{
+    float fine   = fine_grain(pos, GRAIN_SIZE, seed);
+    float coarse = blurred_noise(pos, GRAIN_SIZE * 1.5, seed + 17.3);
+    return mix(fine, coarse, COARSE_MIX);
+}
+
 vec4 hook()
 {
     vec2 pixel_pos = HOOKED_pos * HOOKED_size;
     float seed = random;
 
-    float fine   = fine_grain(pixel_pos, GRAIN_SIZE, seed);
-    float coarse = blurred_noise(pixel_pos, GRAIN_SIZE * 1.5, seed + 17.3);
-    float grain  = mix(fine, coarse, COARSE_MIX);
+    float grain;
+    if (SOFTNESS < 0.001) {
+        grain = grain_sample(pixel_pos, seed);
+    } else {
+        float r = SOFTNESS * GRAIN_SIZE;
+        grain  = grain_sample(pixel_pos,                      seed) * 0.20;
+        grain += grain_sample(pixel_pos + vec2( r,  0.0),    seed) * 0.16;
+        grain += grain_sample(pixel_pos + vec2(-r,  0.0),    seed) * 0.16;
+        grain += grain_sample(pixel_pos + vec2( 0.0,  r),    seed) * 0.16;
+        grain += grain_sample(pixel_pos + vec2( 0.0, -r),    seed) * 0.16;
+        grain += grain_sample(pixel_pos + vec2( r,  r),      seed) * 0.04;
+        grain += grain_sample(pixel_pos + vec2(-r,  r),      seed) * 0.04;
+        grain += grain_sample(pixel_pos + vec2( r, -r),      seed) * 0.04;
+        grain += grain_sample(pixel_pos + vec2(-r, -r),      seed) * 0.04;
+    }
 
     vec4 color = HOOKED_tex(HOOKED_pos);
     float luma = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
