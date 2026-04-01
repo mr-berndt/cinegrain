@@ -151,16 +151,14 @@ vec4 hook()
     if (SOFTNESS < 0.001) {
         grain = grain_sample(pixel_pos, seed);
     } else {
+        // 5-tap cross blur (cardinal directions only, corners dropped for performance)
+        // Weights renormalized from 9-tap: centre 0.20/0.84, cardinal 0.16/0.84
         float r = SOFTNESS * GRAIN_SIZE;
-        grain  = grain_sample(pixel_pos,                      seed) * 0.20;
-        grain += grain_sample(pixel_pos + vec2( r,  0.0),    seed) * 0.16;
-        grain += grain_sample(pixel_pos + vec2(-r,  0.0),    seed) * 0.16;
-        grain += grain_sample(pixel_pos + vec2( 0.0,  r),    seed) * 0.16;
-        grain += grain_sample(pixel_pos + vec2( 0.0, -r),    seed) * 0.16;
-        grain += grain_sample(pixel_pos + vec2( r,  r),      seed) * 0.04;
-        grain += grain_sample(pixel_pos + vec2(-r,  r),      seed) * 0.04;
-        grain += grain_sample(pixel_pos + vec2( r, -r),      seed) * 0.04;
-        grain += grain_sample(pixel_pos + vec2(-r, -r),      seed) * 0.04;
+        grain  = grain_sample(pixel_pos,                   seed) * 0.238;
+        grain += grain_sample(pixel_pos + vec2( r,  0.0), seed) * 0.190;
+        grain += grain_sample(pixel_pos + vec2(-r,  0.0), seed) * 0.190;
+        grain += grain_sample(pixel_pos + vec2(0.0,  r),  seed) * 0.190;
+        grain += grain_sample(pixel_pos + vec2(0.0, -r),  seed) * 0.190;
     }
 
     vec4 color = HOOKED_tex(HOOKED_pos);
