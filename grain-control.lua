@@ -18,12 +18,12 @@ local SHADER_PATH = "~/.config/mpv/shaders/cinegrain.glsl"
 -- ─── Presets ──────────────────────────────────────────────────────────────────
 -- Add or edit presets here. Order = cycle order.
 local presets = {
-    { name = "super35mm",       INTENSITY=0.060, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.10, BLUR=0.90, CHROMA=0.10 },
-    { name = "super35mm heavy", INTENSITY=0.115, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.00, COARSE_MIX=0.15, BLUR=0.35, CHROMA=0.20 },
-    { name = "super16mm",       INTENSITY=0.145, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.00, COARSE_MIX=0.22, BLUR=0.55, CHROMA=0.20 },
-    { name = "super16mm heavy", INTENSITY=0.150, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.75, COARSE_MIX=0.25, BLUR=0.35, CHROMA=0.25 },
-    { name = "8mm",             INTENSITY=0.200, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.25, COARSE_MIX=0.30, BLUR=0.30, CHROMA=0.30 },
-    { name = "8mm heavy",       INTENSITY=0.280, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=3.00, COARSE_MIX=0.35, BLUR=0.25, CHROMA=0.35 },
+    { name = "35mm",       INTENSITY=0.060, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.10, BLUR=0.90, CHROMA=0.10 },
+    { name = "35mm heavy", INTENSITY=0.115, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.00, COARSE_MIX=0.15, BLUR=0.35, CHROMA=0.20 },
+    { name = "16mm",       INTENSITY=0.145, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.00, COARSE_MIX=0.22, BLUR=0.55, CHROMA=0.20 },
+    { name = "16mm heavy", INTENSITY=0.165, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=3.00, COARSE_MIX=0.30, BLUR=0.65, CHROMA=0.10 },
+    { name = "8mm",        INTENSITY=0.165, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=3.50, COARSE_MIX=0.30, BLUR=1.00, CHROMA=0.15 },
+    { name = "8mm heavy",  INTENSITY=0.280, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=4.50, COARSE_MIX=0.35, BLUR=1.00, CHROMA=0.08 },
 }
 -- ──────────────────────────────────────────────────────────────────────────────
 
