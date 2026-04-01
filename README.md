@@ -46,13 +46,19 @@ Mixed by `COARSE_MIX`. This reproduces the multi-scale texture of real film grai
 
 ### Spatial Correlation via Blur
 
-A 5-tap cross-pattern blur further softens hard grid edges:
+A 5-tap cross-pattern blur further softens hard grid edges in the coarse layer:
 
 ```glsl
 n0*2 + n(+r,0) + n(-r,0) + n(0,+r) + n(0,-r)  /  6
 ```
 
 The blur radius scales with `GRAIN_SIZE` and is controlled by `BLUR`.
+
+### Softness (Post-Blur)
+
+An optional 9-tap spatial blur over the final grain signal, controlled by `SOFTNESS`. The blur radius is **relative to grain size** (`r = SOFTNESS × GRAIN_SIZE`), so the same SOFTNESS value produces proportionally correct blur at any grain scale — from sub-pixel 35mm to coarse 8mm.
+
+This reproduces the optical softening that occurs when small film grain is magnified to projection size: 8mm grain projected onto a cinema screen is inherently softer than 35mm grain at the same screen size.
 
 ### Color Grain
 
@@ -68,13 +74,14 @@ The shader uses mpv's `//!PARAM` directive to declare all parameters as GLSL uni
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
-| `INTENSITY` | 0.040 | 0–2 | Overall grain strength |
+| `INTENSITY` | 0.09 | 0–2 | Overall grain strength |
 | `PEAK` | 0.40 | 0–1 | Luminance where grain peaks (0=shadows, 1=highlights) |
-| `ROLLOFF` | 0.20 | 0.01–2 | Bell curve width (larger = grain over wider tonal range) |
-| `GRAIN_SIZE` | 2.0 | 0.5–6 | Primary grain size in pixels |
-| `COARSE_MIX` | 0.30 | 0–1 | Coarse layer amount (0 = fine only, 1 = coarse only) |
-| `BLUR` | 0.40 | 0–1 | Grain softness (0 = crisp, 1 = soft) |
-| `CHROMA` | 0.30 | 0–1 | Color grain strength (R/B channel shifts) |
+| `ROLLOFF` | 0.40 | 0.01–2 | Bell curve width (larger = grain over wider tonal range) |
+| `GRAIN_SIZE` | 0.75 | 0.5–6 | Primary grain size in pixels |
+| `COARSE_MIX` | 0.40 | 0–1 | Coarse layer amount (0 = fine only, 1 = coarse only) |
+| `BLUR` | 0.70 | 0–1 | Grain texture (0 = smooth organic blobs, 1 = fine pixel noise) |
+| `CHROMA` | 0.20 | 0–1 | Color grain strength (R/B channel shifts) |
+| `SOFTNESS` | 0.0 | 0–8 | Spatial blur over grain (relative: actual radius = SOFTNESS × GRAIN_SIZE) |
 
 ---
 
@@ -116,34 +123,44 @@ The Lua script loads automatically from the scripts directory.
 
 All presets are defined at the top of `grain-control.lua` and can be edited freely. Cycle through them with `ALT+,` / `ALT+.`.
 
-### Aliens (1986) 4K Blu-ray
-The 4K transfer of Aliens is de-noised to death. The **35mm high** preset matches the grain texture of the 1080p version missing in the 4K transfer.
+### Calibration methodology
+
+The built-in presets simulate real film grain for Super 35mm, Super 16mm, and Super 8mm film formats. Each was calibrated by visual A/B comparison against lossless PNG screenshots of actual film grain scans (projected at DCI 4K resolution onto a 50% gray card, with all processing disabled).
+
+The key insight: **all film formats share the same emulsion** — the only physical difference is the gate size (how much of the negative is exposed) and the film speed (ISO). Larger formats show finer grain because the image is magnified less; faster film stocks have physically larger silver halide crystals.
+
+This means the grain *character* — its organic shape, spatial correlation, and blur — is identical across formats. Only three parameters change:
+
+| Parameter | What it represents |
+|---|---|
+| `GRAIN_SIZE` | Gate size × film speed (magnification + crystal size) |
+| `INTENSITY` | Perceived grain strength at projection size |
+| `SOFTNESS` | Spatial blur (relative to grain size) |
+
+All other parameters are universal:
 
 ```
-INTENSITY  0.050
-PEAK       0.40
-ROLLOFF    0.30
-GRAIN_SIZE 1.25
-COARSE_MIX 0.70
-BLUR       0.80
-CHROMA     0.20
+BLUR       0.55    -- texture mix (value noise vs pixel hash)
+COARSE_MIX 0.70    -- dual-scale clustering ratio
+CHROMA     0.05    -- subtle color variation
+PEAK       0.40    -- grain peaks in midtones
+ROLLOFF    0.40    -- bell curve width
 ```
 
-### 35mm Normal
-Scanned 35mm grain — moderate intensity, high COARSE_MIX for organic clustering, low BLUR for crispness.
+### Film format presets
 
-```
-INTENSITY  0.075   PEAK  0.40   ROLLOFF  0.40
-GRAIN_SIZE 1.25    COARSE_MIX  0.60   BLUR  0.10   CHROMA  0.20
-```
+"Normal" simulates a slow, fine-grained stock (e.g. Kodak 5219 / Vision3 500T). "Fast" simulates a faster, coarser stock (e.g. pushed Tri-X or high-speed reversal).
 
-### 35mm high
-Softer, more pronounced grain with higher blur — good for de-noised transfers where grain needs to read as film texture rather than noise. Works well for Aliens 4K and similar over-processed masters.
+**A note on accuracy:** Side-by-side comparison with real film scans shows that the structural characteristics — grain shape, clustering, spatial correlation, and scale — are authentically film-like. The synthesized grain does not replicate a specific film stock, but it looks like *a* real film stock. Think of it as a plausible film that Kodak never manufactured, rather than a digital approximation.
 
-```
-INTENSITY  0.050   PEAK  0.40   ROLLOFF  0.30
-GRAIN_SIZE 1.25    COARSE_MIX  0.70   BLUR  0.80   CHROMA  0.20
-```
+| Preset | GRAIN_SIZE | INTENSITY | SOFTNESS | Use case |
+|---|---|---|---|---|
+| **35mm** | 0.65 | 0.085 | 0.46 | Modern 35mm scans, subtle texture |
+| **35mm fast** | 0.70 | 0.160 | 1.13 | De-noised 4K transfers (e.g. Aliens), pushed 35mm |
+| **16mm** | 1.00 | 0.130 | 0.87 | 16mm documentary / indie look |
+| **16mm fast** | 1.41 | 0.145 | 1.06 | High-speed 16mm, visible grain structure |
+| **8mm** | 2.50 | 0.160 | 1.13 | Super 8 home movie texture |
+| **8mm fast** | 2.50 | 0.240 | 1.16 | Grainy Super 8, high-speed reversal |
 
 ---
 
@@ -181,86 +198,47 @@ It is a a little hard to see at this size, but compression artifacts are masked 
 
 ---
 
-## Examples
+## Preset Comparison: Reference Scan vs. cinegrain
 
-The following examples were developed by comparing against real 35mm grain scans. Appears a little blurry due to high magnification — actual grain is finer and sharper at normal viewing distance. Playing with the parameters can simulate a variety of actual film grain.
+Each image shows a 1024px center crop: real film scan (left) vs. cinegrain preset (right). Best viewed at full size.
 
-| Reference scan 1 | Reference scan 2 |
-|:---:|:---:|
-| <img src="35mm_grain_scan_1_crop.jpg" width="400"> | <img src="35mm_grain_scan_2_crop.jpg" width="400"> |
+**35mm** — fine, barely visible grain
+![35mm comparison](comparison_35mm.jpg)
 
-These are not built-in presets — use them as starting points for your own tuning.
+**35mm fast** — pushed stock, more pronounced
+![35mm fast comparison](comparison_35mm_fast.jpg)
 
-### 35mm G3
-Fine-grain stock. Subtle texture, almost invisible — good for modern films or sources you want to enhance without it being obvious.
+**16mm** — visible texture, uniform
+![16mm comparison](comparison_16mm.jpg)
 
-```
-INTENSITY  0.125   PEAK  0.35   ROLLOFF  0.40
-GRAIN_SIZE 1.0     COARSE_MIX  0.0   BLUR  0.0   CHROMA  0.30
-```
-<img src="cinegrain_preset_35mm_g3_int0.125_peak0.35_roll0.4_size1_coarse0_blur0_chroma0.3_crop.jpg" width="400">
+**16mm fast** — coarser, high-speed stock
+![16mm fast comparison](comparison_16mm_fast.jpg)
 
-### 35mm pushed
-Coarser, more character. Older stock feel.
+**8mm** — soft, large-scale grain structure
+![8mm comparison](comparison_8mm.jpg)
 
-```
-INTENSITY  0.190   PEAK  0.35   ROLLOFF  0.47
-GRAIN_SIZE 0.75    COARSE_MIX  0.40   BLUR  0.0   CHROMA  0.20
-```
-<img src="cinegrain_preset_35mm2_int0.19_peak0.35_roll0.47_size0.75_coarse0.4_chroma0.2_crop.jpg" width="400">
-
-### Kodak Gold 200
-Consumer film stock. Chunky, warm grain with visible color separation. Strong effect.
-
-```
-INTENSITY  0.500   PEAK  0.29   ROLLOFF  0.45
-GRAIN_SIZE 0.5     COARSE_MIX  0.20   BLUR  0.0   CHROMA  0.30
-```
-<img src="cinegrain_preset_KODAK_GOLD_200_int0.5_peak_0.29_roll0.45_size0.5_coarse0.2_blur_0_chroma0.3_crop.jpg" width="400">
-
----
-
-## Visual Comparison
-
-Same frame, four different settings. Shows what **GRAIN_SIZE** and **COARSE_MIX** actually do.
-
-*Best viewed when opened in a new tab.*
-
-**No grain**
-![no grain](comparison_no-grain.jpg)
-
-**Fine / mosquito** — `SIZE 0.50  COARSE 0.55  INT 0.125`
-![mosquito noise](comparison_mosquito.jpg)
-
-**Medium / cinematic** — `SIZE 2.00  COARSE 0.20  INT 0.055`
-![medium grain](comparison_medium.jpg)
-
-**Large / coarse** — `SIZE 2.00  COARSE 0.45  INT 0.060`
-![coarse grain](comparison_coarse.jpg)
-
-**Fine + high COARSE_MIX** (top right): sub-pixel grain clusters into irregular blobs — looks like video noise or mosquito artifacts, not film.
-
-**Medium SIZE + low COARSE_MIX** (bottom left): smooth, fine texture. Looks like a clean fine-grain stock. Good baseline for most sources.
-
-**Medium SIZE + high COARSE_MIX** (bottom right): the same grid but with coarser clumping structure layered on top. This is what pushed or older 35mm film looks like — irregular clusters with visible scale variation.
-
-The key takeaway: **GRAIN_SIZE sets the base scale, COARSE_MIX sets how organic it looks**. Fine grain with high COARSE_MIX reads as noise. Coarser grain with moderate COARSE_MIX reads as film.
+**8mm fast** — heavy, pronounced grain
+![8mm fast comparison](comparison_8mm_fast.jpg)
 
 ---
 
 ## Tuning Guide
 
-**Start with INTENSITY.** Toggle the shader on/off (`ALT+z`) to compare. Aim for the difference to be felt rather than seen.
+**Start with a preset.** The built-in presets are calibrated against real film scans and provide a physically grounded starting point. Pick the format closest to the look you want.
 
-**GRAIN_SIZE** controls the visual scale of the grain. Match the source: older film tends to be coarser (2.5–4), modern film finer (1.5–2).
+**Adjust INTENSITY** to taste. Toggle the shader on/off (`ALT+q`) to compare. Aim for the difference to be felt rather than seen.
 
-**COARSE_MIX** adds the "clumping" character of real film. Low values look more like fine-grain stocks (Kodak 5203), higher values like pushed or older stocks.
+**GRAIN_SIZE** controls the visual scale of the grain. The presets already set this based on real format magnification ratios, but you can fine-tune it.
 
-**ROLLOFF** widens or narrows the tonal range where grain appears. Low values (0.15–0.25) concentrate grain in midtones only — good for clean digital sources. Higher values give a more analog character across the full range.
+**SOFTNESS** controls how optically soft the grain appears. The blur radius is relative to grain size (`r = SOFTNESS × GRAIN_SIZE`), so a value of ~1.0 works across most formats. Sub-pixel grain (35mm) needs less (~0.5).
 
-**CHROMA** adds subtle color variation. Keep it below INTENSITY. Values above 0.5 start looking like digital camera noise.
+**COARSE_MIX** (0.70 for all presets) adds the "clumping" character of real film. Lower values look more like fine-grain stocks, higher values like pushed or older stocks.
 
-**BLUR** is usually set once per screen size. Larger displays or projectors benefit from more blur (0.4–0.6) to avoid seeing the noise grid at large grain sizes.
+**BLUR** (0.55 for all presets) controls the texture mix between smooth organic blobs (0) and fine pixel noise (1). The calibrated value of 0.55 matches real film scans across all formats.
+
+**CHROMA** adds subtle color variation. Keep it low (0.05 for all presets). Values above 0.15 start looking like digital camera noise.
+
+**ROLLOFF** widens or narrows the tonal range where grain appears. The default of 0.40 gives a natural analog character across the full range.
 
 ---
 
