@@ -156,9 +156,22 @@ vec4 hook()
     if (SOFTNESS < 0.001) {
         grain = grain_sample(pixel_pos, seed);
     } else {
-        // 5-tap cross blur using fine_grain only (no coarse layer per tap)
-        // The spatial averaging over radius provides coarse structure — inner
-        // blurred_noise would be redundant and expensive. ~70% fewer hash ops.
+        // 5-tap cross blur using fine_grain only (no coarse layer per tap).
+        // PERFORMANCE COMPROMISE — physical correctness deferred:
+        //
+        // Using fine_grain instead of grain_sample means COARSE_MIX has no
+        // effect when SOFTNESS > 0 (which is all current presets). This removes
+        // the emulsion crystal clustering from the SOFTNESS path entirely.
+        //
+        // COARSE_MIX (crystal clustering in emulsion) and SOFTNESS (optical blur
+        // from projection magnification) are physically distinct phenomena and
+        // should both be active simultaneously. The correct implementation uses
+        // grain_sample here (5 × 29 hash ops = 145 total) instead of fine_grain
+        // (5 × 9 = 45). On GTX 1650 Ti at 4K the full grain_sample path was
+        // borderline — the 5-tap version (56% of original 9-tap cost) is untested.
+        //
+        // TODO: replace fine_grain with grain_sample below, then A/B compare
+        // against ProRes reference scans on a calibrated monitor before deploying.
         float r = SOFTNESS * GRAIN_SIZE;
         grain  = fine_grain(pixel_pos,                   GRAIN_SIZE, seed) * 0.238;
         grain += fine_grain(pixel_pos + vec2( r,  0.0), GRAIN_SIZE, seed) * 0.190;
