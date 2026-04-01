@@ -49,10 +49,11 @@ local steps = {
     SOFTNESS   = 0.05,
 }
 
--- amos-specific persistence files
-local VALUE_FILE         = "/home/nicola/.config/mpv/mpv-grain-value"
-local SHARPEN_VALUE_FILE = "/home/nicola/.config/mpv/mpv-sharpen-value"
-local PRESET_FILE        = "/home/nicola/.config/mpv/mpv-grain-preset"
+-- Persistence files (per-user)
+local config_dir = (os.getenv("MPV_HOME") or os.getenv("HOME") .. "/.config/mpv")
+local VALUE_FILE         = config_dir .. "/mpv-grain-value"
+local SHARPEN_VALUE_FILE = config_dir .. "/mpv-sharpen-value"
+local PRESET_FILE        = config_dir .. "/mpv-grain-preset"
 
 local function push_opts()
     -- Read-merge-write: preserve other shaders' params in the shared flat map
