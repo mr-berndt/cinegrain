@@ -25,8 +25,8 @@ local presets = {
     { name = "35mm 250D (mid)",  INTENSITY=0.125, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.75, BLUR=0.65, CHROMA=0.08, SOFTNESS=0.15 },
     { name = "35mm 500T (high)", INTENSITY=0.135, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.10, BLUR=0.90, CHROMA=0.05, SOFTNESS=0.25 },
     { name = "16mm 50D (low)",   INTENSITY=0.100, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.35, COARSE_MIX=0.65, BLUR=0.40, CHROMA=0.05, SOFTNESS=0.85 },
-    { name = "16mm 500T (high)", INTENSITY=0.095, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.80, COARSE_MIX=0.90, BLUR=0.90, CHROMA=0.05, SOFTNESS=0.65 },
-    { name = "S8 50D (low)",     INTENSITY=0.090, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.00, COARSE_MIX=0.70, BLUR=1.00, CHROMA=0.05, SOFTNESS=1.40 },
+    { name = "16mm 500T (high)", INTENSITY=0.075, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.80, COARSE_MIX=0.90, BLUR=0.90, CHROMA=0.05, SOFTNESS=0.65 },
+    { name = "S8 50D (low)",     INTENSITY=0.075, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.00, COARSE_MIX=0.70, BLUR=1.00, CHROMA=0.05, SOFTNESS=1.40 },
     { name = "S8 500T (high)",   INTENSITY=0.100, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.05, COARSE_MIX=0.70, BLUR=1.00, CHROMA=0.05, SOFTNESS=1.25 },
 }
 -- ──────────────────────────────────────────────────────────────────────────────
@@ -232,4 +232,15 @@ mp.add_key_binding("Alt+d", "grain-demo", function()
     for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
     mp.set_property("glsl-shader-opts", table.concat(parts, ","))
     mp.osd_message(demo_on and "Gray card: ON" or "Gray card: OFF", 2)
+end)
+
+-- IPC handler for external scripts (mpv-grain via IR remote)
+mp.register_script_message("grain-set-intensity", function(val)
+    local v = tonumber(val)
+    if v then
+        params.INTENSITY = math.max(0.0, math.min(2.0, v))
+        current_preset_name = nil
+        push_opts()
+        osd_update()
+    end
 end)
