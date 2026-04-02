@@ -190,22 +190,22 @@ The toggle (`ALT+q`) makes this immediately visible. Switch grain on — the ima
 Very clean digital source, cutout from a 4k frame, that (in my opinion) strongly benefits from grain. I chose this frame because it also nicely shows the grain's behavior in bright parts and shadows. Best viewed in Fullscreen.
 
 **No grain**
-![no grain](images/grain_off_cropped.png)
+[![no grain](images/grain_off_cropped.png)](images/grain_off_cropped.png)
 
 **35mm 50D (low)** — subtle texture, barely visible
-![35mm low](images/grain_35mm_low_cropped.png)
+[![35mm low](images/grain_35mm_low_cropped.png)](images/grain_35mm_low_cropped.png)
 
 **35mm 500T (high)** — clear film character
-![35mm high](images/grain_35mm_high_cropped.png)
+[![35mm high](images/grain_35mm_high_cropped.png)](images/grain_35mm_high_cropped.png)
 
 **16mm 50D (low)** — coarser, visible in backgrounds
-![16mm low](images/grain_16_mm_low_cropped.png)
+[![16mm low](images/grain_16_mm_low_cropped.png)](images/grain_16_mm_low_cropped.png)
 
 **16mm 500T (high)** — pronounced grain structure
-![16mm high](images/grain_16_mm_high_cropped.png)
+[![16mm high](images/grain_16_mm_high_cropped.png)](images/grain_16_mm_high_cropped.png)
 
 **S8 50D (low)** — large, soft grain, home movie texture
-![8mm low](images/grain_8_mm_low_cropped.png)
+[![8mm low](images/grain_8_mm_low_cropped.png)](images/grain_8_mm_low_cropped.png)
 
 ---
 
@@ -214,22 +214,22 @@ Very clean digital source, cutout from a 4k frame, that (in my opinion) strongly
 Each image shows a 1024px center crop: real film scan (left) vs. cinegrain preset (right). Best viewed at full size.
 
 **35mm** — fine, barely visible grain
-![35mm comparison](images/comparison_35mm.jpg)
+[![35mm comparison](images/comparison_35mm.jpg)](images/comparison_35mm.jpg)
 
 **35mm fast** — pushed stock, more pronounced
-![35mm fast comparison](images/comparison_35mm_fast.jpg)
+[![35mm fast comparison](images/comparison_35mm_fast.jpg)](images/comparison_35mm_fast.jpg)
 
 **16mm** — visible texture, uniform
-![16mm comparison](images/comparison_16mm.jpg)
+[![16mm comparison](images/comparison_16mm.jpg)](images/comparison_16mm.jpg)
 
 **16mm fast** — coarser, high-speed stock
-![16mm fast comparison](images/comparison_16mm_fast.jpg)
+[![16mm fast comparison](images/comparison_16mm_fast.jpg)](images/comparison_16mm_fast.jpg)
 
 **8mm** — soft, large-scale grain structure
-![8mm comparison](images/comparison_8mm.jpg)
+[![8mm comparison](images/comparison_8mm.jpg)](images/comparison_8mm.jpg)
 
 **8mm fast** — heavy, pronounced grain
-![8mm fast comparison](images/comparison_8mm_fast.jpg)
+[![8mm fast comparison](images/comparison_8mm_fast.jpg)](images/comparison_8mm_fast.jpg)
 
 ---
 
