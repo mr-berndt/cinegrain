@@ -135,13 +135,15 @@ float blurred_noise(vec2 pixel_pos, float size, float seed)
     return (n0 + n1 + n2 + n3 + n4) / 6.0;
 }
 
-// Asymmetric bell curve: Gaussian highlight rolloff × power-law shadow ramp.
-// Shadow side: (luma/PEAK)^0.18 with smoothstep cutoff below 4% luma.
+// Asymmetric bell curve: tight Gaussian highlight rolloff × power-law shadow ramp.
+// Highlight side uses ROLLOFF * 0.35 — grain fades faster above PEAK.
+// Shadow side: (luma/PEAK)^0.18 with smoothstep cutoff below 3% luma.
 // Power law gives film-like shadow grain; smoothstep kills it cleanly
 // near true black to prevent black-level lift. Validated against scans.
 float luma_weight(float luma)
 {
-    float d = (luma - PEAK) / ROLLOFF;
+    float r = (luma > PEAK) ? ROLLOFF * 0.35 : ROLLOFF;
+    float d = (luma - PEAK) / r;
     float bell = exp(-0.5 * d * d);
     float shadow = min(pow(luma / max(PEAK, 0.001), 0.18), 1.0) * smoothstep(0.0, 0.03, luma);
     return bell * shadow;

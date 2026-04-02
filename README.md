@@ -26,18 +26,19 @@ One pixel, one value, one channel. Film grain has texture, scale, and subtle col
 
 ### Luminance Curve
 
-Grain intensity follows an asymmetric curve over luminance — a Gaussian bell for highlight rolloff combined with a square-root ramp in the shadows:
+Grain intensity follows a fully asymmetric curve over luminance — a narrow Gaussian for highlights, a power-law ramp for shadows, with a smoothstep cutoff near true black:
 
 ```
-bell   = exp(-0.5 * ((luma - PEAK) / ROLLOFF)²)
-shadow = sqrt(luma / PEAK)
+r      = (luma > PEAK) ? ROLLOFF × 0.35 : ROLLOFF
+bell   = exp(-0.5 × ((luma - PEAK) / r)²)
+shadow = min(pow(luma / PEAK, 0.18), 1.0) × smoothstep(0, 0.03, luma)
 weight = bell × shadow
 ```
 
-The shadow side follows the **Selwyn granularity law**: grain RMS is proportional to the square root of exposure. This matches measured film data (cf. AV1 film grain synthesis paper, Fig. 5) and produces a steeper, more natural shadow fade than a symmetric bell curve.
+The shadow side uses a power law (γ=0.18) validated against real film reference scans and the AV1 film grain synthesis paper (Fig. 5). The smoothstep kills grain cleanly below 3% luma to prevent black-level lift. The highlight side uses a tighter Gaussian (35% of ROLLOFF) so grain fades quickly above PEAK.
 
-- Shadows → sqrt ramp → 0 at black, steep rise → no gray lift
-- Highlights → Gaussian rolloff → no harsh grain on bright areas
+- Shadows → power-law ramp × smoothstep → true black stays black
+- Highlights → tight Gaussian → grain disappears quickly above PEAK
 - Midtones → peak grain at `PEAK`, like real film
 
 ### Multi-Scale Value Noise
