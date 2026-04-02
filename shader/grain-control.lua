@@ -18,16 +18,16 @@ local SHADER_PATH = "~/.config/mpv/shaders/cinegrain.glsl"
 -- ─── Presets ──────────────────────────────────────────────────────────────────
 -- Add or edit presets here. Order = cycle order.
 local presets = {
-    -- Universal character: BLUR=0.55, COARSE_MIX=0.70, CHROMA=0.05
+    -- Calibrated against real film grain scans at DCI 4K (2026-04-02)
     -- SOFTNESS is relative (r = SOFTNESS * GRAIN_SIZE in shader)
-    -- Only SIZE, INTENSITY, and SOFTNESS vary per format
-    { name = "35mm 50D (low)",  INTENSITY=0.085, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.65, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=0.46 },
-    { name = "35mm 250D (mid)", INTENSITY=0.115, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.67, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=0.73 },
-    { name = "35mm 500T (high)", INTENSITY=0.160, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.70, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.13 },
-    { name = "16mm 50D (low)",  INTENSITY=0.130, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.00, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=0.87 },
-    { name = "16mm 500T (high)", INTENSITY=0.145, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.41, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.06 },
-    { name = "S8 50D (low)",    INTENSITY=0.160, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.50, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.13 },
-    { name = "S8 500T (high)",   INTENSITY=0.240, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.50, COARSE_MIX=0.70, BLUR=0.55, CHROMA=0.05, SOFTNESS=1.16 },
+    -- Calibrated with COARSE_MIX active against real film scans (nelly, 2026-04-02)
+    { name = "35mm 50D (low)",   INTENSITY=0.085, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.65, BLUR=0.40, CHROMA=0.10, SOFTNESS=0.05 },
+    { name = "35mm 250D (mid)",  INTENSITY=0.125, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.75, BLUR=0.65, CHROMA=0.08, SOFTNESS=0.15 },
+    { name = "35mm 500T (high)", INTENSITY=0.135, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.10, BLUR=0.90, CHROMA=0.05, SOFTNESS=0.25 },
+    { name = "16mm 50D (low)",   INTENSITY=0.100, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.35, COARSE_MIX=0.65, BLUR=0.40, CHROMA=0.05, SOFTNESS=0.85 },
+    { name = "16mm 500T (high)", INTENSITY=0.095, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.80, COARSE_MIX=0.90, BLUR=0.90, CHROMA=0.05, SOFTNESS=0.65 },
+    { name = "S8 50D (low)",     INTENSITY=0.090, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.00, COARSE_MIX=0.70, BLUR=1.00, CHROMA=0.05, SOFTNESS=1.40 },
+    { name = "S8 500T (high)",   INTENSITY=0.100, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=2.05, COARSE_MIX=0.70, BLUR=1.00, CHROMA=0.05, SOFTNESS=1.25 },
 }
 -- ──────────────────────────────────────────────────────────────────────────────
 
@@ -218,3 +218,18 @@ mp.add_key_binding("Alt+l", "grain-blur-down",      function() adjust("BLUR",   
 
 mp.add_key_binding("Alt+p", "grain-chroma-up",      function() adjust("CHROMA",     steps.CHROMA,     0.0,  1.0)  end, rep)
 mp.add_key_binding("Alt+ö", "grain-chroma-down",    function() adjust("CHROMA",    -steps.CHROMA,     0.0,  1.0)  end, rep)
+
+mp.add_key_binding("Alt+ü", "grain-soft-up",        function() adjust("SOFTNESS",   steps.SOFTNESS,   0.0,  8.0)  end, rep)
+mp.add_key_binding("Alt+ä", "grain-soft-down",      function() adjust("SOFTNESS",  -steps.SOFTNESS,   0.0,  8.0)  end, rep)
+
+-- Demo mode: toggle 50% gray card
+local demo_on = false
+mp.add_key_binding("Alt+d", "grain-demo", function()
+    demo_on = not demo_on
+    local cur = mp.get_property_native("glsl-shader-opts", {})
+    cur[SHADER_NAME .. "/DEMO"] = demo_on and "0.5000" or "0.0000"
+    local parts = {}
+    for k, v in pairs(cur) do parts[#parts+1] = k .. "=" .. v end
+    mp.set_property("glsl-shader-opts", table.concat(parts, ","))
+    mp.osd_message(demo_on and "Gray card: ON" or "Gray card: OFF", 2)
+end)

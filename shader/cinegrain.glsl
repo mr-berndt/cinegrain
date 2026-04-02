@@ -57,6 +57,13 @@
 //!MAXIMUM 8.0
 0.0
 
+//!PARAM DEMO
+//!DESC Gray card mode (0=off, 0.5=50% gray)
+//!TYPE float
+//!MINIMUM 0.0
+//!MAXIMUM 1.0
+0.0
+
 //!HOOK OUTPUT
 //!BIND HOOKED
 //!DESC cinegrain
@@ -170,17 +177,18 @@ vec4 hook()
         // (5 × 9 = 45). On GTX 1650 Ti at 4K the full grain_sample path was
         // borderline — the 5-tap version (56% of original 9-tap cost) is untested.
         //
-        // TODO: replace fine_grain with grain_sample below, then A/B compare
-        // against ProRes reference scans on a calibrated monitor before deploying.
+        // COARSE_MIX active: grain_sample includes both fine + coarse layers.
+        // Cost: 5 × grain_sample = 145 hash ops (OK on RTX 4060, borderline GTX 1650 Ti)
         float r = SOFTNESS * GRAIN_SIZE;
-        grain  = fine_grain(pixel_pos,                   GRAIN_SIZE, seed) * 0.238;
-        grain += fine_grain(pixel_pos + vec2( r,  0.0), GRAIN_SIZE, seed) * 0.190;
-        grain += fine_grain(pixel_pos + vec2(-r,  0.0), GRAIN_SIZE, seed) * 0.190;
-        grain += fine_grain(pixel_pos + vec2(0.0,  r),  GRAIN_SIZE, seed) * 0.190;
-        grain += fine_grain(pixel_pos + vec2(0.0, -r),  GRAIN_SIZE, seed) * 0.190;
+        grain  = grain_sample(pixel_pos,                   seed) * 0.238;
+        grain += grain_sample(pixel_pos + vec2( r,  0.0), seed) * 0.190;
+        grain += grain_sample(pixel_pos + vec2(-r,  0.0), seed) * 0.190;
+        grain += grain_sample(pixel_pos + vec2(0.0,  r),  seed) * 0.190;
+        grain += grain_sample(pixel_pos + vec2(0.0, -r),  seed) * 0.190;
     }
 
     vec4 color = HOOKED_tex(HOOKED_pos);
+    if (DEMO > 0.0) color = vec4(vec3(DEMO), 1.0);
     float luma = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
     float weight = luma_weight(luma);
 
