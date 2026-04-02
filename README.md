@@ -173,6 +173,8 @@ Preset names reference real Kodak Vision3 film stocks. The parenthetical label i
 
 ## Side Effects (the good kind)
 
+To my happy surprise this shader can produce a real looking grain structure of such fine granularity, that one could not realistically encode it with h264 or h265 onto available media like Bluray-discs. The needed bitrate would simply be insane.
+
 Grain does something unexpected beyond texture: it **masks compression artifacts and makes the image appear sharper**.
 
 This is a dithering effect. Compression artifacts and upscaling softness both create false smooth gradients. Adding spatially-correlated noise breaks up those gradients, returning apparent detail. The effect is particularly strong on:
