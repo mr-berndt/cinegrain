@@ -1,8 +1,10 @@
-# cinegrain
+# cinegrain - Let's make some noise!
 
-A film grain shader for [mpv](https://mpv.io) with real-time parameter control.
+<p align="left"><img src="filmgrain_microscope.jpg"></p>
 
-Being frustrated with titles like the 4k release of Aliens, which are de-noised to death and look terrible, I looked for a way to make them watchable again by adding the missing grain back to them. 
+cinegrain is a glsl film grain shader for [mpv](https://mpv.io) with real-time parameter control.
+
+Being frustrated with titles like the 4k release of Aliens, which are de-noised to death and look terrible, I looked for a way to make them watchable again by adding back the missing grain.
 
 The most widely used mpv grain shader is perhaps haasn's [filmgrain-smooth](https://github.com/haasn/gentoo-conf/blob/xor/home/nand/.mpv/shaders/filmgrain-smooth.glsl) (LGPL v2.1+). It generates good random noise, but has some drawbacks compared to real film grain:
 
@@ -22,17 +24,21 @@ One pixel, one value, one channel. Film grain has texture, scale, and subtle col
 
 ## Solution
 
-### Luminance Bell Curve
+### Luminance Curve
 
-Grain intensity is modulated by a Gaussian bell curve over luminance:
+Grain intensity follows an asymmetric curve over luminance — a Gaussian bell for highlight rolloff combined with a square-root ramp in the shadows:
 
 ```
-weight = exp(-0.5 * ((luma - PEAK) / ROLLOFF)²)
+bell   = exp(-0.5 * ((luma - PEAK) / ROLLOFF)²)
+shadow = sqrt(luma / PEAK)
+weight = bell × shadow
 ```
 
-- Shadows → weight → 0 → blacks stay black
-- Highlights → weight falls → no harsh grain on bright areas
-- Midtones → peak grain, like real film
+The shadow side follows the **Selwyn granularity law**: grain RMS is proportional to the square root of exposure. This matches measured film data (cf. AV1 film grain synthesis paper, Fig. 5) and produces a steeper, more natural shadow fade than a symmetric bell curve.
+
+- Shadows → sqrt ramp → 0 at black, steep rise → no gray lift
+- Highlights → Gaussian rolloff → no harsh grain on bright areas
+- Midtones → peak grain at `PEAK`, like real film
 
 ### Multi-Scale Value Noise
 
@@ -40,7 +46,7 @@ Instead of per-pixel randomness, grain is generated as **value noise**: random v
 
 Two layers run simultaneously:
 - **Fine layer** at `GRAIN_SIZE` pixels
-- **Coarse layer** at `GRAIN_SIZE × 2.5` pixels
+- **Coarse layer** at `GRAIN_SIZE × 1.5` pixels
 
 Mixed by `COARSE_MIX`. This reproduces the multi-scale texture of real film grain where fine silver crystals cluster into larger structures.
 
@@ -72,16 +78,16 @@ The shader uses mpv's `//!PARAM` directive to declare all parameters as GLSL uni
 
 ## Parameters
 
-| Parameter | Default | Range | Description |
-|-----------|---------|-------|-------------|
-| `INTENSITY` | 0.09 | 0–2 | Overall grain strength |
-| `PEAK` | 0.40 | 0–1 | Luminance where grain peaks (0=shadows, 1=highlights) |
-| `ROLLOFF` | 0.40 | 0.01–2 | Bell curve width (larger = grain over wider tonal range) |
-| `GRAIN_SIZE` | 0.75 | 0.5–6 | Primary grain size in pixels |
-| `COARSE_MIX` | 0.40 | 0–1 | Coarse layer amount (0 = fine only, 1 = coarse only) |
-| `BLUR` | 0.70 | 0–1 | Grain texture (0 = smooth organic blobs, 1 = fine pixel noise) |
-| `CHROMA` | 0.20 | 0–1 | Color grain strength (R/B channel shifts) |
-| `SOFTNESS` | 0.0 | 0–8 | Spatial blur over grain (relative: actual radius = SOFTNESS × GRAIN_SIZE) |
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| `INTENSITY` | 0–2 | Overall grain strength |
+| `PEAK` | 0–1 | Luminance where grain peaks (0=shadows, 1=highlights) |
+| `ROLLOFF` | 0.01–2 | Bell curve width (larger = grain over wider tonal range) |
+| `GRAIN_SIZE` | 0.5–6 | Primary grain size in pixels |
+| `COARSE_MIX` | 0–1 | Coarse layer amount (0 = fine only, 1 = coarse only) |
+| `BLUR` | 0–1 | Grain texture (0 = smooth organic blobs, 1 = fine pixel noise) |
+| `CHROMA` | 0–1 | Color grain strength (R/B channel shifts) |
+| `SOFTNESS` | 0–8 | Spatial blur over grain (relative: actual radius = SOFTNESS × GRAIN_SIZE) |
 
 ---
 
@@ -125,7 +131,7 @@ All presets are defined at the top of `grain-control.lua` and can be edited free
 
 ### Calibration methodology
 
-The built-in presets simulate real film grain for Super 35mm, Super 16mm, and Super 8mm film formats. Each was calibrated by visual A/B comparison against lossless PNG screenshots of actual film grain scans (projected at DCI 4K resolution onto a 50% gray card, with all processing disabled).
+The built-in presets simulate real film grain for 35mm, 16mm, and 8mm film formats with different speeds. Each was calibrated by visual A/B comparison against lossless PNG screenshots of actual film grain scans (projected at DCI 4K resolution onto a 50% gray card, with all processing disabled).
 
 The key insight: **all film formats share the same emulsion** — the only physical difference is the gate size (how much of the negative is exposed) and the film speed (ISO). Larger formats show finer grain because the image is magnified less; faster film stocks have physically larger silver halide crystals.
 
@@ -156,7 +162,7 @@ Preset names reference real Kodak Vision3 film stocks. The parenthetical label i
 | Preset | GRAIN_SIZE | INTENSITY | SOFTNESS | Use case |
 |---|---|---|---|---|
 | **35mm 50D (low)** | 0.65 | 0.085 | 0.46 | Modern 35mm scans, subtle texture |
-| **35mm 250D (mid)** | 0.67 | 0.115 | 0.73 | De-noised 4K transfers (e.g. Aliens), medium-speed daylight stock |
+| **35mm 250D (mid)** | 0.67 | 0.115 | 0.73 | This one was tuned for Aliens 4k! |
 | **35mm 500T (high)** | 0.70 | 0.160 | 1.13 | Pushed 35mm, tungsten workhorse |
 | **16mm 50D (low)** | 1.00 | 0.130 | 0.87 | 16mm documentary / indie look |
 | **16mm 500T (high)** | 1.41 | 0.145 | 1.06 | High-speed 16mm, visible grain structure |
@@ -175,31 +181,35 @@ This is a dithering effect. Compression artifacts and upscaling softness both cr
 - Over-smoothed 4K remasters of older films
 - Any source where aggressive noise reduction has removed real texture
 
-The toggle (`ALT+q`) makes this immediately visible. Switch grain on — the image snaps into focus, banding disappears, fine detail returns. The grain is not adding sharpness; it is revealing it. On the other hand it allows you to apply more sharpening without visually oversharpening it, since the sharpening-artifacts are masked.
+The toggle (`ALT+q`) makes this immediately visible. Switch grain on — the image snaps into focus, banding disappears, fine detail returns. The grain is not adding sharpness; it is revealing it. On the other hand it allows you to apply more sharpening without visually oversharpening it, since the sharpening-artifacts are masked. At some point of course the grain is taking over.
 
 ---
 
-## Before / After
+## Preset Comparison
 
-Source: 720p DVD — low-bitrate encode with visible compression noise.
+Very clean digital source, cutout from a 4k frame, that (in my opinion) strongly benefits from grain. I chose this frame because it also nicely shows the grain's behavior in bright parts and shadows. Best viewed in Fullscreen.
 
-**Without grain**
-![before](dvd-sample_no-grain.jpg)
+**No grain**
+![no grain](grain_off_cropped.png)
 
-**With grain**
-![after](dvd-sample_grain.jpg)
+**35mm 50D (low)** — subtle texture, barely visible
+![35mm low](grain_35mm_low_cropped.png)
 
-Detail:
+**35mm 500T (high)** — clear film character
+![35mm high](grain_35mm_high_cropped.png)
 
-| Without grain | With grain |
-|:---:|:---:|
-| ![before crop](dvd-sample_crop_no-grain.jpg) | ![after crop](dvd-sample_crop_grain.jpg) |
+**16mm 50D (low)** — coarser, visible in backgrounds
+![16mm low](grain_16_mm_low_cropped.png)
 
-It is a a little hard to see at this size, but compression artifacts are masked and the image reads as sharper and more filmic despite being the same low-resolution source.
+**16mm 500T (high)** — pronounced grain structure
+![16mm high](grain_16_mm_high_cropped.png)
+
+**S8 50D (low)** — large, soft grain, home movie texture
+![8mm low](grain_8_mm_low_cropped.png)
 
 ---
 
-## Preset Comparison: Reference Scan vs. cinegrain
+## Reference Scan Comparison
 
 Each image shows a 1024px center crop: real film scan (left) vs. cinegrain preset (right). Best viewed at full size.
 
