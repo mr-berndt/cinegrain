@@ -1,14 +1,21 @@
-# TODO: COARSE_MIX fix in SOFTNESS path
+# TODO: Enable COARSE_MIX inside the SOFTNESS path
 
 ## Problem
 
-All presets have SOFTNESS > 0, but the SOFTNESS code path uses `fine_grain`
-instead of `grain_sample`. This means **COARSE_MIX has zero effect** — the
-coarse grain layer (emulsion crystal clustering) is completely absent.
+The shader has two code paths (see `hook()` in cinegrain.glsl):
+- `SOFTNESS < 0.001` → calls `grain_sample()` → COARSE_MIX **works**
+- `SOFTNESS >= 0.001` → calls `fine_grain()` → COARSE_MIX **is ignored**
+
+All presets have SOFTNESS > 0, so they always take the second path.
+**COARSE_MIX=0.70 in every preset currently does nothing.**
 
 ## What to do
 
-In `cinegrain.glsl` around line 176, replace `fine_grain` with `grain_sample`:
+In the `else` branch (SOFTNESS >= 0.001), replace all 5 `fine_grain()` calls
+with `grain_sample()`. This makes COARSE_MIX active **together with** SOFTNESS.
+The `if` branch (SOFTNESS == 0) stays unchanged.
+
+Find the block that looks like this:
 
 ```glsl
 // Current (COARSE_MIX broken):
