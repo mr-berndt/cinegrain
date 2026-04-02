@@ -57,6 +57,13 @@
 //!MAXIMUM 8.0
 0.0
 
+//!PARAM DEMO
+//!DESC Gray card mode (0=off, 0.5=50% gray)
+//!TYPE float
+//!MINIMUM 0.0
+//!MAXIMUM 1.0
+0.0
+
 //!HOOK OUTPUT
 //!BIND HOOKED
 //!DESC cinegrain
@@ -181,6 +188,7 @@ vec4 hook()
     }
 
     vec4 color = HOOKED_tex(HOOKED_pos);
+    if (DEMO > 0.0) color = vec4(vec3(DEMO), 1.0);
     float luma = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
     float weight = luma_weight(luma);
 
