@@ -1,6 +1,6 @@
 # cinegrain - Let's make some noise!
 
-<p align="left"><img src="filmgrain_microscope.jpg"></p>
+<p align="left"><img src="images/filmgrain_microscope.jpg"></p>
 
 cinegrain is a glsl film grain shader for [mpv](https://mpv.io) with real-time parameter control.
 
@@ -113,8 +113,8 @@ The OSD displays all current parameter values persistently. When a preset is act
 
 ## Installation
 
-1. Copy `cinegrain.glsl` to `~/.config/mpv/shaders/`
-2. Copy `grain-control.lua` to `~/.config/mpv/scripts/`
+1. Copy `shader/cinegrain.glsl` to `~/.config/mpv/shaders/`
+2. Copy `shader/grain-control.lua` to `~/.config/mpv/scripts/`
 3. Add to `mpv.conf`:
 
 ```ini
@@ -190,22 +190,22 @@ The toggle (`ALT+q`) makes this immediately visible. Switch grain on — the ima
 Very clean digital source, cutout from a 4k frame, that (in my opinion) strongly benefits from grain. I chose this frame because it also nicely shows the grain's behavior in bright parts and shadows. Best viewed in Fullscreen.
 
 **No grain**
-![no grain](grain_off_cropped.png)
+![no grain](images/grain_off_cropped.png)
 
 **35mm 50D (low)** — subtle texture, barely visible
-![35mm low](grain_35mm_low_cropped.png)
+![35mm low](images/grain_35mm_low_cropped.png)
 
 **35mm 500T (high)** — clear film character
-![35mm high](grain_35mm_high_cropped.png)
+![35mm high](images/grain_35mm_high_cropped.png)
 
 **16mm 50D (low)** — coarser, visible in backgrounds
-![16mm low](grain_16_mm_low_cropped.png)
+![16mm low](images/grain_16_mm_low_cropped.png)
 
 **16mm 500T (high)** — pronounced grain structure
-![16mm high](grain_16_mm_high_cropped.png)
+![16mm high](images/grain_16_mm_high_cropped.png)
 
 **S8 50D (low)** — large, soft grain, home movie texture
-![8mm low](grain_8_mm_low_cropped.png)
+![8mm low](images/grain_8_mm_low_cropped.png)
 
 ---
 
@@ -214,22 +214,22 @@ Very clean digital source, cutout from a 4k frame, that (in my opinion) strongly
 Each image shows a 1024px center crop: real film scan (left) vs. cinegrain preset (right). Best viewed at full size.
 
 **35mm** — fine, barely visible grain
-![35mm comparison](comparison_35mm.jpg)
+![35mm comparison](images/comparison_35mm.jpg)
 
 **35mm fast** — pushed stock, more pronounced
-![35mm fast comparison](comparison_35mm_fast.jpg)
+![35mm fast comparison](images/comparison_35mm_fast.jpg)
 
 **16mm** — visible texture, uniform
-![16mm comparison](comparison_16mm.jpg)
+![16mm comparison](images/comparison_16mm.jpg)
 
 **16mm fast** — coarser, high-speed stock
-![16mm fast comparison](comparison_16mm_fast.jpg)
+![16mm fast comparison](images/comparison_16mm_fast.jpg)
 
 **8mm** — soft, large-scale grain structure
-![8mm comparison](comparison_8mm.jpg)
+![8mm comparison](images/comparison_8mm.jpg)
 
 **8mm fast** — heavy, pronounced grain
-![8mm fast comparison](comparison_8mm_fast.jpg)
+![8mm fast comparison](images/comparison_8mm_fast.jpg)
 
 ---
 
