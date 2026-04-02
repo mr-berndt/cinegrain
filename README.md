@@ -253,6 +253,14 @@ Each image shows a 1024px center crop: real film scan (left) vs. cinegrain prese
 
 ---
 
+## Known Limitations
+
+**Resolution dependence:** The shader hooks into `OUTPUT`, so `GRAIN_SIZE` is in viewport pixels, not source pixels. The built-in presets were calibrated at 4K (3840×2160). At 1920×1080, the same grain covers twice the relative image area and appears coarser. Simply halving `GRAIN_SIZE` doesn't work — values below ~0.5px lose spatial correlation and degrade to per-pixel noise.
+
+A proper fix would auto-scale grain parameters based on output resolution. This is not yet implemented.
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
