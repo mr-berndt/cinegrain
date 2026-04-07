@@ -21,7 +21,7 @@ local presets = {
     -- Calibrated against real film grain scans at DCI 4K (2026-04-02)
     -- SOFTNESS is relative (r = SOFTNESS * GRAIN_SIZE in shader)
     -- Calibrated with COARSE_MIX active against real film scans (nelly, 2026-04-02)
-    { name = "35mm 50D (low)",   INTENSITY=0.065, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.65, BLUR=0.40, CHROMA=0.10, SOFTNESS=0.05 },
+    { name = "35mm 50D (low)",   INTENSITY=0.080, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.65, BLUR=0.50, CHROMA=0.10, SOFTNESS=0.60 },
     { name = "35mm 250D (mid)",  INTENSITY=0.125, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.75, BLUR=0.65, CHROMA=0.08, SOFTNESS=0.15 },
     { name = "35mm 500T (high)", INTENSITY=0.135, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=0.50, COARSE_MIX=0.10, BLUR=0.90, CHROMA=0.05, SOFTNESS=0.25 },
     { name = "16mm 50D (low)",   INTENSITY=0.100, PEAK=0.40, ROLLOFF=0.40, GRAIN_SIZE=1.35, COARSE_MIX=0.65, BLUR=0.40, CHROMA=0.05, SOFTNESS=0.85 },
