@@ -54,10 +54,10 @@ PRESETS = {
         "description": "Fine 16mm — more magnification = coarser appearance",
     },
     "16mm-500T": {
-        "crystal_density": 0.15,
-        "crystal_size_mean": 2.0,
+        "crystal_density": 0.01,
+        "crystal_size_mean": 8.0,
         "crystal_size_std": 0.3,
-        "blur_sigma": 1.0,
+        "blur_sigma": 5.0,
         "description": "Fast 16mm, heavy grain",
     },
     "S8-50D": {
@@ -85,26 +85,31 @@ def generate_grain_field(width, height, density, size_mean, size_std, rng):
     This approximates the physical process of silver halide crystals developing
     on the film emulsion.
     """
+    # Newson Boolean model approximation:
+    # 1. Place crystal point masses (Poisson process)
+    # 2. Convolve with disc kernels (crystal shape)
+    # 3. Clamp to [0,1] — approximates Boolean union (covered or not)
+    # 4. Optical blur applied separately after this function
+    # 5. Downscale to output tile size (in generate_tile)
+    #
+    # At high gen resolution (4096) with small crystals, the downscale
+    # averages over hundreds of crystals per output pixel → organic grain.
+
+    from scipy.signal import fftconvolve
+
     field = np.zeros((height, width), dtype=np.float64)
 
-    # Number of crystals from Poisson process
     area = width * height
     n_crystals = rng.poisson(density * area)
 
-    # Random positions (uniform)
     cx = rng.uniform(0, width, n_crystals)
     cy = rng.uniform(0, height, n_crystals)
 
-    # Log-normal crystal sizes (radius in pixels)
     sizes = rng.lognormal(np.log(size_mean), size_std, n_crystals)
     sizes = np.clip(sizes, 0.5, size_mean * 4)
 
-    # Random opacity per crystal
-    opacity = rng.uniform(0.5, 1.0, n_crystals)
-
-    # Paint filled discs (not point masses) — this gives crystals physical extent.
-    # Use np.add.at for vectorized accumulation per radius bin.
-    n_bins = 12
+    # Binned disc convolution (fast)
+    n_bins = 8
     size_min, size_max = float(sizes.min()), float(sizes.max())
     bin_edges = np.linspace(size_min, size_max, n_bins + 1)
 
@@ -114,23 +119,19 @@ def generate_grain_field(width, height, density, size_mean, size_std, rng):
         if not np.any(mask):
             continue
 
-        # Disc kernel for this size bin
-        r = int(np.ceil((lo + hi) / 2.0))
-        if r < 1:
-            r = 1
+        r = max(1, int(np.ceil((lo + hi) / 2.0)))
         y_k, x_k = np.ogrid[-r:r+1, -r:r+1]
         disc = ((x_k**2 + y_k**2) <= r**2).astype(np.float64)
-        disc /= disc.sum()  # normalize
 
-        # Accumulate point masses
         points = np.zeros((height, width), dtype=np.float64)
         ix = np.clip(cx[mask].astype(int), 0, width - 1)
         iy = np.clip(cy[mask].astype(int), 0, height - 1)
-        np.add.at(points, (iy, ix), opacity[mask])
+        np.add.at(points, (iy, ix), 1.0)
 
-        # Convolve with disc kernel (much faster than per-crystal splatting)
-        from scipy.signal import fftconvolve
         field += fftconvolve(points, disc, mode='same')
+
+    # Boolean approximation: clamp to [0, 1] — covered or not
+    field = np.clip(field, 0.0, 1.0)
 
     return field
 
@@ -151,13 +152,18 @@ def apply_optical_transfer(field, sigma):
 
 def normalize_grain(field):
     """
-    Normalize to zero-mean, unit-variance grain signal in [-1, 1] range.
-    This makes the grain ready for INTENSITY scaling in the shader.
+    Normalize to zero-mean grain signal in [-1, 1] range.
+    Includes high-pass to remove low-frequency density variations
+    (Poisson process creates random clumps — real emulsion is more uniform).
     """
-    field = field - np.mean(field)
+    from scipy.ndimage import gaussian_filter
+    # High-pass: subtract low-frequency component (block-scale variation)
+    lowpass = gaussian_filter(field, sigma=32)
+    field = field - lowpass
+    # Normalize
     std = np.std(field)
     if std > 0:
-        field = field / (3.0 * std)  # 3-sigma → [-1, 1] for most values
+        field = field / (3.0 * std)
     return np.clip(field, -1.0, 1.0)
 
 
