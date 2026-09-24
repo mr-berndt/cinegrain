@@ -1,5 +1,9 @@
 # cinegrain - Let's make some noise!
 
+> [!IMPORTANT]
+> **cinegrain is deprecated. Use [cinegrain 2](https://github.com/mr-berndt/cinegrain2) instead.**
+> cinegrain 2 shapes the grain with a five-zone equalizer over the brightness range, which follows real film stocks far better than the single bell curve used here. This shader keeps working, but it is no longer developed.
+
 <p align="left"><img src="images/filmgrain_microscope.jpg"></p>
 
 cinegrain is a glsl film grain shader for [mpv](https://mpv.io) with real-time parameter control.
